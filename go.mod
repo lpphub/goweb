@@ -1,4 +1,4 @@
-module goweb
+module github.com/lpphub/goweb
 
 go 1.25
 

@@ -3,11 +3,11 @@ package logx
 import (
 	"context"
 	"fmt"
-	"goweb/ext/logger"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lpphub/goweb/ext/logger"
 )
 
 const (
