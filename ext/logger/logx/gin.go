@@ -3,7 +3,7 @@ package logx
 import (
 	"context"
 	"fmt"
-	"golib/ext/logger"
+	"goweb/ext/logger"
 	"strconv"
 	"time"
 
