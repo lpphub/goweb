@@ -7,38 +7,38 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Resp struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-	Data any    `json:"data,omitempty"`
+type Result struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    any    `json:"data,omitempty"`
 }
 
 func OK(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, Resp{
-		Code: 0,
-		Msg:  "ok",
+	ctx.JSON(http.StatusOK, Result{
+		Code:    0,
+		Message: "ok",
 	})
 }
 
 func OKWithData(ctx *gin.Context, data any) {
-	ctx.JSON(http.StatusOK, Resp{
-		Code: 0,
-		Msg:  "ok",
-		Data: data,
+	ctx.JSON(http.StatusOK, Result{
+		Code:    0,
+		Message: "ok",
+		Data:    data,
 	})
 }
 
 func Fail(ctx *gin.Context, code int, msg string) {
-	ctx.AbortWithStatusJSON(http.StatusOK, Resp{
-		Code: code,
-		Msg:  msg,
+	ctx.AbortWithStatusJSON(http.StatusOK, Result{
+		Code:    code,
+		Message: msg,
 	})
 }
 
 func FailWithErr(ctx *gin.Context, code int, err error) {
-	ctx.AbortWithStatusJSON(http.StatusOK, Resp{
-		Code: code,
-		Msg:  err.Error(),
+	ctx.AbortWithStatusJSON(http.StatusOK, Result{
+		Code:    code,
+		Message: err.Error(),
 	})
 }
 
@@ -52,8 +52,8 @@ func FailWithError(ctx *gin.Context, err error) {
 }
 
 func FailWithStatus(ctx *gin.Context, statusCode int, err error) {
-	ctx.AbortWithStatusJSON(statusCode, Resp{
-		Code: statusCode,
-		Msg:  err.Error(),
+	ctx.AbortWithStatusJSON(statusCode, Result{
+		Code:    statusCode,
+		Message: err.Error(),
 	})
 }
