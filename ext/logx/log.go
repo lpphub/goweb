@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lpphub/goweb/ext/logger"
+	"github.com/lpphub/goweb/pkg/logger"
 	"github.com/redis/go-redis/v9"
 )
 

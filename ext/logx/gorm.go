@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lpphub/goweb/ext/logger"
+	"github.com/lpphub/goweb/pkg/logger"
 	"gorm.io/gorm"
 	glog "gorm.io/gorm/logger"
 )

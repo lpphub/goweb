@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lpphub/goweb/ext/logger"
+	"github.com/lpphub/goweb/pkg/logger"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 )
 
 func init() {
-	logger.RegisterCtxExtractor(func(ctx context.Context) context.Context {
+	logger.RegisterCtxAdapter(func(ctx context.Context) context.Context {
 		if gCtx, ok := ctx.(*gin.Context); ok {
 			return gCtx.Request.Context()
 		}

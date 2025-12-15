@@ -56,7 +56,7 @@ func New(opts ...Option) Logger {
 type ctxKey struct{}
 
 func Ctx(ctx context.Context) Logger {
-	for _, extractor := range ctxExtractors {
+	for _, extractor := range ctxAdapters {
 		ctx = extractor(ctx)
 	}
 	if l, ok := ctx.Value(ctxKey{}).(Logger); ok {
