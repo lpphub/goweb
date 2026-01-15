@@ -8,8 +8,8 @@ import (
 
 type contextTxKey struct{}
 
-// withTx 将事务 DB 注入 context（仅内部使用）
-func withTx(ctx context.Context, tx *gorm.DB) context.Context {
+// WithTx 将事务 DB 注入 context
+func WithTx(ctx context.Context, tx *gorm.DB) context.Context {
 	return context.WithValue(ctx, contextTxKey{}, tx)
 }
 
