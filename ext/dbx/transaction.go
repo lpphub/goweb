@@ -34,7 +34,7 @@ func InTransaction(ctx context.Context, db *gorm.DB, fn func(context.Context) er
 	}
 
 	return db.Transaction(func(tx *gorm.DB) error {
-		txCtx := withTx(ctx, tx)
+		txCtx := WithTx(ctx, tx)
 		return fn(txCtx)
 	})
 }
