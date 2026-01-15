@@ -6,25 +6,35 @@ import (
 	"gorm.io/gorm"
 )
 
-var transactionKey struct{}
+type contextTxKey struct{}
 
-// WithTransaction 中间件：将tx存入context
-func WithTransaction(ctx context.Context, tx *gorm.DB) context.Context {
-	return context.WithValue(ctx, transactionKey, tx)
+// withTx 将事务 DB 注入 context（仅内部使用）
+func withTx(ctx context.Context, tx *gorm.DB) context.Context {
+	return context.WithValue(ctx, contextTxKey{}, tx)
 }
 
-// TransactionFromContext 从context获取tx
-func TransactionFromContext(ctx context.Context) *gorm.DB {
-	if tx, ok := ctx.Value(transactionKey).(*gorm.DB); ok {
+// TxFromContext 从 context 中获取事务 DB
+func TxFromContext(ctx context.Context) *gorm.DB {
+	tx, _ := ctx.Value(contextTxKey{}).(*gorm.DB)
+	return tx
+}
+
+// DBFromContext 优先返回事务 DB, 若不存在事务则返回 defaultDB
+func DBFromContext(ctx context.Context, defaultDB *gorm.DB) *gorm.DB {
+	if tx := TxFromContext(ctx); tx != nil {
 		return tx
 	}
-	return nil
+	return defaultDB
 }
 
-// InTransaction 在事务中执行函数
+// InTransaction 在事务中执行 fn, db 为 nil 时直接执行 fn（无事务）
 func InTransaction(ctx context.Context, db *gorm.DB, fn func(context.Context) error) error {
+	if db == nil {
+		return fn(ctx)
+	}
+
 	return db.Transaction(func(tx *gorm.DB) error {
-		txCtx := WithTransaction(ctx, tx)
+		txCtx := withTx(ctx, tx)
 		return fn(txCtx)
 	})
 }
