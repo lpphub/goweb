@@ -14,10 +14,7 @@ type Result struct {
 }
 
 func OK(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, Result{
-		Code:    0,
-		Message: "ok",
-	})
+	OKWithData(ctx, nil)
 }
 
 func OKWithData(ctx *gin.Context, data any) {
