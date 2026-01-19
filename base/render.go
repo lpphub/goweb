@@ -28,27 +28,21 @@ func OKWithData(ctx *gin.Context, data any) {
 	})
 }
 
-func Fail(ctx *gin.Context, code int, msg string) {
+func FailWithErr(ctx *gin.Context, err *Error) {
 	ctx.AbortWithStatusJSON(http.StatusOK, Result{
-		Code:    code,
-		Message: msg,
-	})
-}
-
-func FailWithErr(ctx *gin.Context, code int, err error) {
-	ctx.AbortWithStatusJSON(http.StatusOK, Result{
-		Code:    code,
+		Code:    err.Code,
 		Message: err.Error(),
 	})
 }
 
 func FailWithError(ctx *gin.Context, err error) {
-	var e Error
-	if ok := errors.As(err, &e); ok {
-		Fail(ctx, e.Code, e.Error())
+	var bizErr *Error
+	if ok := errors.As(err, &bizErr); ok {
+		FailWithErr(ctx, bizErr)
 		return
 	}
-	Fail(ctx, 500, err.Error())
+
+	FailWithStatus(ctx, http.StatusInternalServerError, err)
 }
 
 func FailWithStatus(ctx *gin.Context, statusCode int, err error) {

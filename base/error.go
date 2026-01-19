@@ -1,17 +1,20 @@
 package base
 
+import "fmt"
+
 type Error struct {
-	Code int
-	Msg  string
+	Code    int
+	Message string
 }
 
-func NewError(code int, msg string) Error {
-	return Error{
-		Code: code,
-		Msg:  msg,
-	}
+func (err *Error) Error() string { // 指针接收者
+	return err.Message
 }
 
-func (err Error) Error() string {
-	return err.Msg
+func NewError(code int, message string) *Error {
+	return &Error{Code: code, Message: message}
+}
+
+func NewErrorf(code int, format string, a ...any) *Error {
+	return &Error{Code: code, Message: fmt.Sprintf(format, a...)}
 }
