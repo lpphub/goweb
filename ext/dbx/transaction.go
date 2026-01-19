@@ -19,12 +19,12 @@ func TxFromContext(ctx context.Context) *gorm.DB {
 	return tx
 }
 
-// TxAwareDB 优先返回事务DB, 若不存在事务则返回默认db
+// TxAwareDB 优先返回事务DB, 若不存在事务则返回指定db
 func TxAwareDB(ctx context.Context, db *gorm.DB) *gorm.DB {
 	if tx := TxFromContext(ctx); tx != nil {
 		return tx
 	}
-	return db
+	return db.WithContext(ctx)
 }
 
 // InTransaction 在事务中执行 fn, db 为 nil 时直接执行 fn（无事务）
