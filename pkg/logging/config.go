@@ -16,6 +16,7 @@ import (
 type (
 	logger = zerolog.Logger
 	Event  = zerolog.Event
+	Level  = zerolog.Level
 )
 
 func newZerolog(cfg *config) logger {
@@ -32,7 +33,7 @@ func newZerolog(cfg *config) logger {
 }
 
 type config struct {
-	level  zerolog.Level
+	level  Level
 	output io.Writer
 }
 
@@ -45,7 +46,7 @@ func defaultConfig() *config {
 	}
 }
 
-func WithLevel(level zerolog.Level) Option {
+func WithLevel(level Level) Option {
 	return func(c *config) {
 		c.level = level
 	}
@@ -61,7 +62,7 @@ func WithOutputFile(filepath string) Option {
 	return func(c *config) {
 		lj := &lumberjack.Logger{
 			Filename:   filepath, // 路径
-			MaxSize:    100,      // 单个文件最大 MB
+			MaxSize:    200,      // 单个文件最大 MB
 			MaxBackups: 5,        // 最多保留几个旧文件
 			MaxAge:     14,       // 旧文件最长保存天数
 			Compress:   true,     // 是否 gzip 压缩旧文件

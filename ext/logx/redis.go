@@ -14,8 +14,9 @@ import (
 
 // RedisLogger 自定义Redis客户端日志记录器
 type RedisLogger struct {
-	slowThreshold time.Duration
 	logger        logging.Logger
+	slowThreshold time.Duration
+	cmdMaxLen     int
 }
 
 // NewRedisLogger 创建新的Redis日志记录器
@@ -23,6 +24,7 @@ func NewRedisLogger() *RedisLogger {
 	return &RedisLogger{
 		slowThreshold: 100 * time.Millisecond,
 		logger:        logging.L().WithCaller(5),
+		cmdMaxLen:     1024,
 	}
 }
 
@@ -96,7 +98,7 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 	}
 }
 
-// buildCommandString 构建命令字符串（隐藏敏感信息）
+// buildCmd 构建命令字符串
 func (l *RedisLogger) buildCmd(cmd redis.Cmder) string {
 	args := cmd.Args()
 	if len(args) == 0 {
@@ -109,16 +111,14 @@ func (l *RedisLogger) buildCmd(cmd redis.Cmder) string {
 		argStrs = append(argStrs, fmt.Sprintf("%v", arg))
 	}
 
-	// 隐藏敏感命令的参数
-	cmdName := strings.ToUpper(cmd.Name())
-	if l.isSensitiveCommand(cmdName) {
-		if len(argStrs) > 1 {
-			// 保留命令名，隐藏参数
-			return fmt.Sprintf("%s ****", argStrs[0])
-		}
+	cmdStr := strings.Join(argStrs, " ")
+
+	// 截断超长命令
+	if len(cmdStr) > l.cmdMaxLen {
+		cmdStr = cmdStr[:l.cmdMaxLen] + " ...[truncated]"
 	}
 
-	return strings.Join(argStrs, " ")
+	return cmdStr
 }
 
 func (l *RedisLogger) buildPipelineCmd(cmds []redis.Cmder) string {
@@ -137,30 +137,16 @@ func (l *RedisLogger) buildPipelineCmd(cmds []redis.Cmder) string {
 		}
 		sb.WriteString(l.buildCmd(cmd))
 	}
-	return sb.String()
+	pipelineStr := sb.String()
+
+	// 截断超长管道命令
+	if len(pipelineStr) > l.cmdMaxLen {
+		pipelineStr = pipelineStr[:l.cmdMaxLen] + " ...[truncated]"
+	}
+
+	return pipelineStr
 }
 
 func (l *RedisLogger) fmtDuration(d time.Duration) string {
 	return fmt.Sprintf("%.3f", float64(d.Nanoseconds())/1e6)
-}
-
-// isSensitiveCommand 判断是否为敏感命令
-func (l *RedisLogger) isSensitiveCommand(cmdName string) bool {
-	sensitiveCommands := map[string]bool{
-		"AUTH":    true,
-		"SET":     false, // 可能包含敏感值
-		"GET":     false,
-		"HSET":    false, // 可能包含敏感值
-		"HGET":    false,
-		"LPUSH":   false, // 可能包含敏感值
-		"RPUSH":   false, // 可能包含敏感值
-		"LSET":    false, // 可能包含敏感值
-		"CONFIG":  true,  // 可能包含敏感配置
-		"DEBUG":   true,
-		"EVAL":    true, // 脚本可能包含敏感信息
-		"SCRIPT":  true,
-		"MIGRATE": true,
-		"RESTORE": true,
-	}
-	return sensitiveCommands[cmdName]
 }

@@ -16,7 +16,7 @@ func TestCtxInfo(t *testing.T) {
 
 		Info(ctx, "test222")
 
-		L().Info(ctx).Str("field", "0000").Msg("test333")
+		L().Error(ctx).Str("field", "0000").Msg("test333")
 
 		ctx = WithFields(ctx, Str("field", "1111"))
 

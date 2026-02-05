@@ -13,17 +13,19 @@ import (
 
 // GormLogger 自定义GORM日志记录器
 type GormLogger struct {
+	logger        logging.Logger
 	logLevel      logger.LogLevel
 	slowThreshold time.Duration
-	logger        logging.Logger
+	sqlMaxLen     int
 }
 
 // NewGormLogger 创建新的GORM日志记录器
 func NewGormLogger() logger.Interface {
 	return &GormLogger{
 		logLevel:      logger.Info,
-		slowThreshold: 1000 * time.Millisecond,
 		logger:        logging.L().WithCaller(5),
+		slowThreshold: 1000 * time.Millisecond,
+		sqlMaxLen:     1024,
 	}
 }
 
@@ -72,6 +74,11 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	elapsed := time.Since(begin)
 	sql, rows := fc()
 
+	// 截断超长 SQL
+	if len(sql) > l.sqlMaxLen {
+		sql = sql[:l.sqlMaxLen] + " ...[truncated]"
+	}
+
 	fields := map[string]interface{}{
 		"sql":         sql,
 		"rows":        rows,
@@ -83,13 +90,17 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 		l.log(ctx, logger.Error, fmt.Sprintf("query error: %s", err.Error()), fields)
 	case l.slowThreshold > 0 && elapsed > l.slowThreshold:
 		l.log(ctx, logger.Warn, "slow query", fields)
-	case l.logLevel >= logger.Info:
+	default:
 		l.log(ctx, logger.Info, "query success", fields)
 	}
 }
 
 // log 通用日志方法
 func (l *GormLogger) log(ctx context.Context, level logger.LogLevel, msg string, fields map[string]interface{}) {
+	if level < l.logLevel {
+		return
+	}
+
 	switch level {
 	case logger.Warn:
 		l.logger.Warn(ctx).Fields(fields).Msg(msg)
