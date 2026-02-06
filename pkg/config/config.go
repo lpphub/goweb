@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -35,4 +36,13 @@ func Load[T any](configPath, configName, configType string) (*T, error) {
 	}
 
 	return &cfg, nil
+}
+
+func LoadConf[T any](configFile string) (*T, error) {
+	dir := filepath.Dir(configFile)
+	file := filepath.Base(configFile)
+	ext := filepath.Ext(file)
+	name := strings.TrimSuffix(file, ext)
+	configType := strings.TrimPrefix(ext, ".")
+	return Load[T](dir, name, configType)
 }
