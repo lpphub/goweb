@@ -26,8 +26,8 @@ func defaultConfig() *accessLogConfig {
 	}
 }
 
-// SkipPaths 跳过指定 Gin 路由，如 /health
-func SkipPaths(paths ...string) AccessLogOption {
+// WithSkipPaths 跳过指定 Gin 路由，如 /health
+func WithSkipPaths(paths ...string) AccessLogOption {
 	return func(cfg *accessLogConfig) {
 		for _, p := range paths {
 			if p != "" {
