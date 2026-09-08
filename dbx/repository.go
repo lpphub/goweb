@@ -22,15 +22,15 @@ func (r *BaseRepo[T]) DB() *gorm.DB {
 	return r.db
 }
 
-func (r *BaseRepo[T]) First(ctx context.Context, id uint) (T, error) {
+func (r *BaseRepo[T]) First(ctx context.Context, id uint) (*T, error) {
 	var entity T
 	if err := TxAwareDB(ctx, r.db).First(&entity, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return entity, ErrNotFound
+			return nil, ErrNotFound
 		}
-		return entity, fmt.Errorf("dbx: first by id %d: %w", id, err)
+		return nil, fmt.Errorf("dbx: first by id %d: %w", id, err)
 	}
-	return entity, nil
+	return &entity, nil
 }
 
 func (r *BaseRepo[T]) FindByIDs(ctx context.Context, ids []uint) ([]T, error) {
